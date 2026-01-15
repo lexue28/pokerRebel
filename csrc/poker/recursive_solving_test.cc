@@ -22,13 +22,13 @@ using namespace poker;
 
 TEST(Mdp, TestZeroNet) {
   // POKER: Game() takes no parameters
-  SubgameSolvingParams params;
-  params.num_iters = 100;
-  params.max_depth = 1;
-  params.linear_update = true;
+  RecursiveSolvingParams params;
+  params.subgame_params.num_iters = 100;
+  params.subgame_params.max_depth = 1;
+  params.subgame_params.linear_update = true;
   const Game game;
   auto net = create_zero_net(game.num_hands());
-  // POKER: Updated constructor - no longer needs game params
+  // POKER: Use RecursiveSolvingParams constructor
   RlRunner runner(params, net, /*seed=*/0);
 
   for (int i = 0; i < 10; ++i) {

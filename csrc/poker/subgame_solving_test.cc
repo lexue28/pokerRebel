@@ -55,34 +55,39 @@ TEST(PokerHandEvaluation, TestHighCard) {
 }
 
 TEST(PokerHandEvaluation, TestPair) {
-  std::vector<int> cards = {0, 4, 10, 15, 20};  // 2c, 2d, 4h, 5s, 6c
+  // Two 2s: 2c(0), 2d(1)
+  std::vector<int> cards = {0, 1, 10, 15, 20};  // 2c, 2d, 4h, 5s, 7c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 1);  // Pair
 }
 
 TEST(PokerHandEvaluation, TestTwoPair) {
-  std::vector<int> cards = {0, 4, 8, 12, 20};  // 2c, 2d, 3c, 3d, 6c
+  // Two pairs: 2s (2c=0, 2d=1) and 3s (3c=4, 3d=5)
+  std::vector<int> cards = {0, 1, 4, 5, 20};  // 2c, 2d, 3c, 3d, 7c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 2);  // Two pair
 }
 
 TEST(PokerHandEvaluation, TestThreeOfAKind) {
-  std::vector<int> cards = {0, 4, 8, 15, 20};  // 2c, 2d, 2h, 5s, 6c
+  // Three 2s: 2c(0), 2d(1), 2h(2)
+  std::vector<int> cards = {0, 1, 2, 15, 20};  // 2c, 2d, 2h, 5s, 7c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 3);  // Three of a kind
 }
 
 TEST(PokerHandEvaluation, TestStraight) {
-  std::vector<int> cards = {0, 5, 10, 15, 20};  // 2c, 3d, 4h, 5s, 6c
+  // Cards: 2c(0), 3d(5), 4h(10), 5s(15), 6c(16) - actual straight
+  std::vector<int> cards = {0, 5, 10, 15, 16};  // 2c, 3d, 4h, 5s, 6c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 4);  // Straight
 }
 
 TEST(PokerHandEvaluation, TestFlush) {
+  // All clubs: 2c(0), 3c(4), 4c(8), 5c(12), 6c(16) - all suit 0
   std::vector<int> cards = {0, 4, 8, 12, 16};  // All clubs: 2c, 3c, 4c, 5c, 6c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
@@ -90,17 +95,18 @@ TEST(PokerHandEvaluation, TestFlush) {
 }
 
 TEST(PokerHandEvaluation, TestFullHouse) {
-  std::vector<int> cards = {0, 4, 8, 12, 16};  // 2c, 2d, 2h, 3c, 3d
-  // Actually need 3 of one rank and 2 of another
-  cards = {0, 4, 8, 12, 13};  // 2c, 2d, 2h, 3c, 3d
+  // Three 2s (2c=0, 2d=1, 2h=2) and two 3s (3c=4, 3d=5)
+  std::vector<int> cards = {0, 1, 2, 4, 5};  // 2c, 2d, 2h, 3c, 3d
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 6);  // Full house
 }
 
 TEST(PokerHandEvaluation, TestHandComparison) {
-  std::vector<int> pair = {0, 4, 10, 15, 20};  // Pair of 2s
-  std::vector<int> high_card = {1, 5, 10, 15, 20};  // High card
+  // Pair of 2s: 2c(0), 2d(1)
+  std::vector<int> pair = {0, 1, 10, 15, 20};  // Pair of 2s
+  // High card (no pairs): 3c(4), 3d(5), 4h(10), 5s(15), 7c(20)
+  std::vector<int> high_card = {4, 5, 10, 15, 20};  // High card
   int64_t pair_value = Game::evaluate_5card_hand(pair);
   int64_t high_card_value = Game::evaluate_5card_hand(high_card);
   ASSERT_GT(pair_value, high_card_value);  // Pair beats high card

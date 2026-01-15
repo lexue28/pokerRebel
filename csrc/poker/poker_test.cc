@@ -62,7 +62,8 @@ TEST_F(GameTest, TestRoot) {
   ASSERT_EQ(root.player_id, 0);  // Player 0 acts first
   ASSERT_EQ(root.street, 0);  // PREFLOP
   ASSERT_EQ(root.num_board_cards, 0);
-  ASSERT_EQ(root.discard_complete, false);
+  ASSERT_EQ(root.discard_choice[0], -1);  // No discard yet
+  ASSERT_EQ(root.discard_choice[1], -1);  // No discard yet
   
   {
     // Pre-flop: all betting actions available
@@ -86,26 +87,26 @@ TEST_F(GameTest, TestStateTransitions) {
 
 // POKER: Test poker hand evaluation
 TEST_F(GameTest, TestPokerHandEvaluation) {
-  // Test high card
-  std::vector<int> cards = {0, 5, 10, 15, 20};  // 2c, 3d, 4h, 5s, 6c
+  // Test high card (ranks 0,1,2,3,5 - not consecutive, no pairs)
+  std::vector<int> cards = {0, 5, 10, 15, 20};  // 2c, 3d, 4h, 5s, 7c
   int64_t hand_value = Game::evaluate_5card_hand(cards);
   int hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 0);  // High card
   
-  // Test pair
-  cards = {0, 4, 10, 15, 20};  // 2c, 2d, 4h, 5s, 6c
+  // Test pair (two 2s: 2c=0, 2d=1)
+  cards = {0, 1, 10, 15, 20};  // 2c, 2d, 4h, 5s, 7c
   hand_value = Game::evaluate_5card_hand(cards);
   hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 1);  // Pair
   
-  // Test two pair
-  cards = {0, 4, 8, 12, 20};  // 2c, 2d, 3c, 3d, 6c
+  // Test two pair (2s: 2c=0,2d=1 and 3s: 3c=4,3d=5)
+  cards = {0, 1, 4, 5, 20};  // 2c, 2d, 3c, 3d, 7c
   hand_value = Game::evaluate_5card_hand(cards);
   hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 2);  // Two pair
   
-  // Test three of a kind
-  cards = {0, 4, 8, 15, 20};  // 2c, 2d, 2h, 5s, 6c
+  // Test three of a kind (three 2s: 2c=0, 2d=1, 2h=2)
+  cards = {0, 1, 2, 15, 20};  // 2c, 2d, 2h, 5s, 7c
   hand_value = Game::evaluate_5card_hand(cards);
   hand_type = Game::get_hand_type(hand_value);
   ASSERT_EQ(hand_type, 3);  // Three of a kind
@@ -142,8 +143,10 @@ TEST_F(GameTest, TestPostDiscardCards) {
 
 // POKER: Test best hand evaluation
 TEST_F(GameTest, TestBestHand) {
-  std::vector<int> hole = {0, 4};  // 2c, 2d
-  std::vector<int> board = {8, 12, 16, 20, 24};  // 3c, 3d, 4c, 5c, 6c
+  // Hole: 2c(0), 2d(1) - pair of 2s
+  std::vector<int> hole = {0, 1};  // 2c, 2d
+  // Board: 3c(4), 3d(5), 4c(8), 5c(12), 6c(16) - pair of 3s on board
+  std::vector<int> board = {4, 5, 8, 12, 16};  // 3c, 3d, 4c, 5c, 6c
   
   int64_t best = Game::evaluate_best_hand(hole, board);
   int hand_type = Game::get_hand_type(best);

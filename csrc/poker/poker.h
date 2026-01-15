@@ -114,6 +114,10 @@ struct PartialPublicState {
     }
     return true;
   }
+
+  bool operator!=(const PartialPublicState& state) const {
+    return !(*this == state);
+  }
 };
 
 class Game {
