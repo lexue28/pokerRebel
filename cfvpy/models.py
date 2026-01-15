@@ -61,6 +61,20 @@ def output_size(num_faces, num_dice):
     return num_faces ** num_dice
 
 
+# POKER VARIANT: Poker-specific model sizes
+def input_size_poker():
+    """
+    Query size for poker: 1 (player_id) + 1 (traverser) + 15 (action_one_hot) + 
+    6 (board_cards) + 2 (discard_choices) + 1 (street) + 22100*2 (beliefs)
+    """
+    return 1 + 1 + 15 + 6 + 2 + 1 + 22100 * 2  # = 44,226
+
+
+def output_size_poker():
+    """Number of possible 3-card hands: C(52, 3) = 22,100"""
+    return 22100
+
+
 class Net2(nn.Module):
     def __init__(
         self,
@@ -84,6 +98,43 @@ class Net2(nn.Module):
         )
         self.output = nn.Linear(
             n_hidden if n_layers > 0 else n_in, output_size(num_faces, num_dice)
+        )
+        # Make initial predictions closer to 0.
+        with torch.no_grad():
+            self.output.weight.data *= 0.01
+            self.output.bias *= 0.01
+
+    def forward(self, packed_input: torch.Tensor):
+        return self.output(self.body(packed_input))
+
+
+class Net2Poker(nn.Module):
+    """
+    Poker variant model for Toss or Hold'em.
+    Input size: 44,226 (query encoding)
+    Output size: 22,100 (number of possible 3-card hands)
+    """
+    def __init__(
+        self,
+        *,
+        n_hidden=256,
+        use_layer_norm=False,
+        dropout=0,
+        n_layers=3,
+    ):
+        super().__init__()
+
+        n_in = input_size_poker()
+        n_out = output_size_poker()
+        self.body = build_mlp(
+            n_in=n_in,
+            n_hidden=n_hidden,
+            n_layers=n_layers,
+            use_layer_norm=use_layer_norm,
+            dropout=dropout,
+        )
+        self.output = nn.Linear(
+            n_hidden if n_layers > 0 else n_in, n_out
         )
         # Make initial predictions closer to 0.
         with torch.no_grad():

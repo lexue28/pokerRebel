@@ -4,3 +4,5 @@ cfvpy/rela*.so
 ^exps/
 strategy*.txt
 __pycache__/
+src/hydra-core/
+src/pytorch-lightning/

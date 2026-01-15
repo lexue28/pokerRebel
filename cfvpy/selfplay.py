@@ -33,10 +33,24 @@ def _build_model(device, env_cfg, cfg, state_dict=None, half=False, jit=False):
     assert cfg is not None
     model_name = cfg.name
     kwargs = cfg.kwargs
-    model_class = getattr(cfvpy.models, model_name)
-    model = model_class(
-        num_faces=env_cfg.num_faces, num_dice=env_cfg.num_dice, **kwargs
-    )
+    
+    # POKER VARIANT: Check if this is a poker variant
+    is_poker = hasattr(env_cfg, 'game') and getattr(env_cfg, 'game', None) == 'toss_holdem'
+    
+    if is_poker:
+        # Poker variant - use poker-specific model
+        logging.info("POKER VARIANT DETECTED: Using Net2Poker model")
+        if model_name == 'Net2':
+            model_name = 'Net2Poker'
+        model_class = getattr(cfvpy.models, model_name)
+        model = model_class(**kwargs)
+    else:
+        # Dice variant - use original model with dice parameters
+        model_class = getattr(cfvpy.models, model_name)
+        model = model_class(
+            num_faces=env_cfg.num_faces, num_dice=env_cfg.num_dice, **kwargs
+        )
+    
     if state_dict is not None:
         model.load_state_dict(state_dict)
     if half:
@@ -71,7 +85,16 @@ class CFVExp:
             ckpt_path,
         )
 
-        self.num_actions = cfg.env.num_dice * cfg.env.num_faces * 2 + 1
+        # POKER VARIANT: Calculate num_actions based on game type
+        is_poker = hasattr(cfg.env, 'game') and getattr(cfg.env, 'game', None) == 'toss_holdem'
+        if is_poker:
+            # Poker: fold (1) + call/check (1) + bet sizes (10) + discards (3) = 15
+            self.num_actions = 15
+            logging.info("POKER VARIANT: num_actions = 15")
+        else:
+            # Dice variant
+            self.num_actions = cfg.env.num_dice * cfg.env.num_faces * 2 + 1
+            logging.info("DICE VARIANT: num_actions = %d", self.num_actions)
 
         self.net = _build_model(self.device, self.cfg.env, self.cfg.model)
         if self.is_master:
@@ -183,7 +206,9 @@ class CFVExp:
         # Need to preserve ownership of the ref models!
         ref_models = []
         model_lockers = []
-        assert torch.cuda.device_count() >= 2, torch.cuda.device_count()
+        # Only require 2+ GPUs if we're using GPU for data generation
+        if not self.cfg.selfplay.cpu_gen_threads:
+            assert torch.cuda.device_count() >= 2, f"Need at least 2 GPUs for GPU data generation, got {torch.cuda.device_count()}"
         if self.cfg.selfplay.cpu_gen_threads:
             num_threads = self.cfg.selfplay.cpu_gen_threads
             act_devices = ["cpu"] * num_threads
