@@ -3,6 +3,10 @@ defaults:
 
 seed: 0
 
+# Device: "cuda" for GPU training, "cpu" for CPU-only
+# If PyTorch doesn't have CUDA support, set to "cpu"
+device: cuda
+
 # Learning rate schedule
 decrease_lr_every: 400
 decrease_lr_times: 2

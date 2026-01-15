@@ -615,16 +615,37 @@ def create_mdp_config(cfr_yaml_cfg):
         cfg_dict = {}
     else:
         cfg_dict = dict(cfr_yaml_cfg)
+    
+    # POKER VARIANT: Filter out Python-only fields that don't exist in C++ struct
+    # These fields are used for Python model detection/config but not in RecursiveSolvingParams
+    # - 'game': poker variant identifier (poker configs only)
+    # - 'num_dice', 'num_faces': dice variant parameters (dice configs only)
+    # Note: Filtering non-existent keys is harmless, so we include all Python-only fields
+    python_only_fields = {'game', 'num_dice', 'num_faces'}
+    filtered_dict = {k: v for k, v in cfg_dict.items() if k not in python_only_fields}
+    
+    # Log which fields were actually filtered (only if they existed in config)
+    filtered_out = python_only_fields.intersection(cfg_dict.keys())
+    if filtered_out:
+        logging.debug(
+            "Filtered out Python-only fields from env config: %s (these don't exist in C++ RecursiveSolvingParams)",
+            filtered_out
+        )
+    
     logging.info(
-        "Using the following kwargs to create RecursiveSolvingParams: %s", cfr_yaml_cfg
+        "Using the following kwargs to create RecursiveSolvingParams: %s", filtered_dict
     )
 
     def recusive_set(cfg, cfg_dict):
         for key, value in cfg_dict.items():
             if not hasattr(cfg, key):
+                # Provide helpful error message with available fields
+                available_fields = [attr for attr in dir(cfg) if not attr.startswith('_')]
                 raise RuntimeError(
-                    f"Cannot find key {key} in {cfg}. It's either not definied"
-                    " or not imposed via pybind11"
+                    f"Cannot find key '{key}' in {type(cfg).__name__}. "
+                    f"It's either not defined or not exposed via pybind11.\n"
+                    f"Available fields: {available_fields}\n"
+                    f"This field might be Python-only and should be filtered out."
                 )
             if isinstance(value, (dict, omegaconf.dictconfig.DictConfig)):
                 recusive_set(getattr(cfg, key), value)
@@ -632,7 +653,7 @@ def create_mdp_config(cfr_yaml_cfg):
                 setattr(cfg, key, value)
         return cfg
 
-    return recusive_set(cfvpy.rela.RecursiveSolvingParams(), cfg_dict)
+    return recusive_set(cfvpy.rela.RecursiveSolvingParams(), filtered_dict)
 
 
 def _preload_data(cfg_preload, replay):
