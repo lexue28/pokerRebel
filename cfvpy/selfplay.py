@@ -18,7 +18,13 @@ import pathlib
 import os
 import time
 
-import pytorch_lightning.logging as pl_logging
+try:
+    import pytorch_lightning.logging as pl_logging
+except ImportError:
+    # Fallback for newer pytorch-lightning versions
+    from pytorch_lightning.loggers import TestTubeLogger
+    class pl_logging:
+        TestTubeLogger = TestTubeLogger
 import omegaconf
 import torch
 import tqdm
