@@ -21,7 +21,9 @@ import time
 try:
     import pytorch_lightning.logging as pl_logging
 except ImportError:
-    # Fallback for newer pytorch-lightning versions
+    # Fallback for newer pytorch-lightning versions (upstream PyTorch Lightning)
+    # The old fork had TestTubeLogger in pytorch_lightning.logging
+    # Upstream PyTorch Lightning has it in pytorch_lightning.loggers
     from pytorch_lightning.loggers import TestTubeLogger
     class pl_logging:
         TestTubeLogger = TestTubeLogger
