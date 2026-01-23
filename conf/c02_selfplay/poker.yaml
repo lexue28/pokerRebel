@@ -22,8 +22,10 @@ env:
 
   subgame_params:
     # CFR iterations per subgame
-    num_iters: 256        # MUCH smaller than paper, CPU-safe
-    max_depth: 4          # Enough to cover discard + betting
+    # ULTRA-SAFE defaults for CPU (prevents OOM during warmup)
+    # Scale up after first successful checkpoint: 16→32→64 for num_iters, 2→3→4 for max_depth
+    num_iters: 16         # Ultra-safe for first run (was 256 - causes OOM)
+    max_depth: 2          # Ultra-safe for first run (was 4 - causes OOM)
     linear_update: true
 
 exploit: true
@@ -37,7 +39,7 @@ selfplay:
   models_per_gpu: 1
 
   # CPU-only data generation
-  cpu_gen_threads: 8      # Do NOT use 60 on a laptop
+  cpu_gen_threads: 1      # Ultra-safe for first run (was 8 - reduces parallel memory blowup)
 
 train_gen_ratio: 4
 task: selfplay
@@ -57,11 +59,11 @@ model:
 create_validation_set_every: 100
 
 data:
-  train_epoch_size: 12800
-  train_batch_size: 512
+  train_epoch_size: 200   # Ultra-safe for first run (was 12800)
+  train_batch_size: 16    # Ultra-safe for first run (was 512)
 
 replay:
-  capacity: 500000        # Smaller buffer for poker prototype
+  capacity: 1000          # Ultra-safe for first run (was 500000 - prevents OOM)
   alpha: 1.0
   beta: 1.0
   prefetch: 8
