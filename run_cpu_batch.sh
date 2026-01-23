@@ -17,16 +17,40 @@ module load miniforge
 # Initialize conda (needed for conda activate to work in batch scripts)
 eval "$(conda shell.bash hook)"
 
-# Activate conda environment
-conda activate rebel_cpu
+# Debug: List available environments
+echo "=== Available conda environments ==="
+conda info --envs
+echo ""
+
+# Activate conda environment (rebel_cpu)
+echo "Activating rebel_cpu environment..."
+conda activate rebel_cpu || {
+    echo "conda activate failed, trying source activate..."
+    source activate rebel_cpu || {
+        echo "Both activation methods failed, using direct path..."
+        export PATH="/home/lexue28/miniconda3/envs/rebel_cpu/bin:$PATH"
+        export CONDA_DEFAULT_ENV=rebel_cpu
+    }
+}
+
+# Verify activation
+if [ -z "$CONDA_DEFAULT_ENV" ] || [ "$CONDA_DEFAULT_ENV" != "rebel_cpu" ]; then
+    echo "WARNING: Environment may not be activated correctly"
+    echo "Using Python from: /home/lexue28/miniconda3/envs/rebel_cpu/bin/python"
+    export PATH="/home/lexue28/miniconda3/envs/rebel_cpu/bin:$PATH"
+fi
+echo "Active environment: ${CONDA_DEFAULT_ENV:-rebel_cpu (via PATH)}"
 
 # Verify we're in the right environment and Python path
 echo "Python path: $(which python)"
 echo "Python version: $(python --version)"
 echo "Conda env: $CONDA_DEFAULT_ENV"
+echo ""
 
 # Verify pytorch_lightning is available
-python -c "import pytorch_lightning; print('pytorch_lightning import successful')" || echo "ERROR: pytorch_lightning not found!"
+echo "=== Testing pytorch_lightning import ==="
+python -c "import pytorch_lightning; print('SUCCESS: pytorch_lightning import successful')" || echo "ERROR: pytorch_lightning not found!"
+echo ""
 
 # Change to project directory (adjust path if needed)
 cd ~/rebel
