@@ -5,7 +5,7 @@ seed: 0
 
 # Device: "cuda" for GPU training, "cpu" for CPU-only
 # If PyTorch doesn't have CUDA support, set to "cpu"
-device: cuda
+device: cpu
 
 # Learning rate schedule
 decrease_lr_every: 400
@@ -28,7 +28,9 @@ env:
     max_depth: 2          # Ultra-safe for first run (was 4 - causes OOM)
     linear_update: true
 
-exploit: true
+# NOTE: exploitability evaluation uses the C++ solver + TorchScript net and may
+# attempt CUDA paths. Keep this off for CPU-only PyTorch builds.
+exploit: false
 
 selfplay:
   network_sync_epochs: 1

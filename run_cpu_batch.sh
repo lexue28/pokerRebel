@@ -47,4 +47,5 @@ mkdir -p logs
 # Using --adhoc flag and setting device=cpu (no launcher = runs locally)
 # ULTRA-SAFE config to prevent OOM during warmup (subgame tree memory is the real issue)
 # This config will get first checkpoint, then scale up: num_iters 16→32→64, max_depth 2→3→4
-python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu selfplay.cpu_gen_threads=1 replay.capacity=1000 data.train_epoch_size=200 data.train_batch_size=16 env.subgame_params.num_iters=16 env.subgame_params.max_depth=2
+# IMPORTANT: exploit=false disables exploitability eval (which can hit CUDA paths).
+python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu exploit=false selfplay.cpu_gen_threads=1 replay.capacity=1000 data.train_epoch_size=200 data.train_batch_size=16 env.subgame_params.num_iters=16 env.subgame_params.max_depth=2
