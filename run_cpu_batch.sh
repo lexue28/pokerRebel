@@ -3,21 +3,30 @@
 # Job Flags - CPU-only job on Engaging portal
 #SBATCH -p mit_normal
 #SBATCH -n 1                    # Number of tasks
-#SBATCH -c 10                   # CPUs per task (8 for generation + 2 for training overhead)
+#SBATCH -c 5                    # CPUs per task (reduced for testing)
 #SBATCH --mem=16G               # Memory (16GB for neural network + replay buffer)
-#SBATCH --time=48:00:00         # Time limit (48 hours for 3000 epochs)
+#SBATCH --time=2:00:00          # Time limit (2 hours for testing)
 # Note: For liars_dice with cpu_gen_threads=60, increase -c to 64 and --mem to 32G
-#SBATCH --job-name=rebel_cpu    # Job name
+#SBATCH --job-name=rebel        # Job name
 #SBATCH --output=logs/logs_%j.out    # Standard output
 #SBATCH --error=logs/logs_%j.err     # Standard error
 
 # Set up environment
 module load miniforge
 
-# Activate conda environment (adjust environment name if different)
-source activate rebel
-# Or if using conda activate:
-# conda activate rebel
+# Initialize conda (needed for conda activate to work in batch scripts)
+eval "$(conda shell.bash hook)"
+
+# Activate conda environment
+conda activate rebel_cpu
+
+# Verify we're in the right environment and Python path
+echo "Python path: $(which python)"
+echo "Python version: $(python --version)"
+echo "Conda env: $CONDA_DEFAULT_ENV"
+
+# Verify pytorch_lightning is available
+python -c "import pytorch_lightning; print('pytorch_lightning import successful')" || echo "ERROR: pytorch_lightning not found!"
 
 # Change to project directory (adjust path if needed)
 cd ~/rebel
