@@ -478,12 +478,16 @@ struct FP : public ISubgameSolver {
           }
         }
         if (params.optimistic) {
-          normalize_probabilities(sum_strategies[node][i],
-                                  last_strategies[node][i],
-                                  &average_strategies[node][i]);
+          // Use safe normalization to prevent assertion failures when strategies become all zeros
+          std::vector<double> combined(sum_strategies[node][i].size());
+          for (size_t j = 0; j < combined.size(); ++j) {
+            combined[j] = sum_strategies[node][i][j] + last_strategies[node][i][j];
+          }
+          normalize_probabilities_safe(combined, kRegretSmoothingEps,
+                                       &average_strategies[node][i]);
         } else {
-          normalize_probabilities(sum_strategies[node][i],
-                                  &average_strategies[node][i]);
+          normalize_probabilities_safe(sum_strategies[node][i], kRegretSmoothingEps,
+                                      &average_strategies[node][i]);
         }
       }
     }
@@ -656,8 +660,9 @@ struct CFR : public ISubgameSolver, private PartialTreeTraverser {
           last_strategies[node][i][action] =
               std::max<double>(regrets[node][i][action], kRegretSmoothingEps);
         }
-        normalize_probabilities(last_strategies[node][i],
-                                &last_strategies[node][i]);
+        // Use safe normalization to prevent assertion failures
+        normalize_probabilities_safe(last_strategies[node][i], kRegretSmoothingEps,
+                                     &last_strategies[node][i]);
       }
     }
 
@@ -683,8 +688,9 @@ struct CFR : public ISubgameSolver, private PartialTreeTraverser {
           sum_strategies[node][i][a] +=
               reach_probabilities_buffer[node][i] * last_strategies[node][i][a];
         }
-        normalize_probabilities(sum_strategies[node][i],
-                                &average_strategies[node][i]);
+        // Use safe normalization to prevent assertion failures
+        normalize_probabilities_safe(sum_strategies[node][i], kRegretSmoothingEps,
+                                     &average_strategies[node][i]);
       }
     }
 
