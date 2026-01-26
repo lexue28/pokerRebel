@@ -94,6 +94,13 @@ inline void normalize_probabilities_safe(
   }
 }
 
+// Overload for std::vector<double>* (needed when passing &vector)
+inline void normalize_probabilities_safe(
+    const std::vector<double>& unnormed_probs, double eps,
+    std::vector<double>* probs) {
+  normalize_probabilities_safe(unnormed_probs, eps, probs->data());
+}
+
 inline std::vector<double> normalize_probabilities_safe(
     const std::vector<double>& unnormed_probs, double eps) {
   std::vector<double> probs(unnormed_probs);
