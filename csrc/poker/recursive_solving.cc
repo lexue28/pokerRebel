@@ -217,8 +217,13 @@ void RlRunner::sample_state_to_leaf(const ISubgameSolver* solver) {
         std::discrete_distribution<> dis(beliefs.begin(), beliefs.end());
         const int hand = dis(gen_);
         const std::vector<double>& policy = strategy[node_id][hand];
-        std::discrete_distribution<> action_dis(policy.begin(), policy.end());
-        action = action_dis(gen_);
+        // Only sample from valid action range to prevent assertion failure
+        std::vector<double> valid_policy(action_end - action_begin);
+        for (Action a = action_begin; a < action_end; ++a) {
+          valid_policy[a - action_begin] = policy[a];
+        }
+        std::discrete_distribution<> action_dis(valid_policy.begin(), valid_policy.end());
+        action = action_begin + action_dis(gen_);
         assert(action >= action_begin && action < action_end);
       }
       // Update beliefs.
@@ -267,10 +272,16 @@ void RlRunner::sample_state_single(const ISubgameSolver* solver) {
     const auto& beliefs = beliefs_[active];
     std::discrete_distribution<> dis(beliefs.begin(), beliefs.end());
     const int hand = dis(gen_);
+    auto [action_begin, action_end] = game_.get_bid_range(state_);
     const std::vector<double>& policy =
         solver->get_sampling_strategy()[0][hand];
-    std::discrete_distribution<> action_dis(policy.begin(), policy.end());
-    action = action_dis(gen_);
+    // Only sample from valid action range to prevent assertion failure
+    std::vector<double> valid_policy(action_end - action_begin);
+    for (Action a = action_begin; a < action_end; ++a) {
+      valid_policy[a - action_begin] = policy[a];
+    }
+    std::discrete_distribution<> action_dis(valid_policy.begin(), valid_policy.end());
+    action = action_begin + action_dis(gen_);
   }
   // Update beliefs.
   // Policy[hand, action] := P(action | hand).
