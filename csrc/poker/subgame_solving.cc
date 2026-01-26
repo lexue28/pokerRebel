@@ -481,26 +481,12 @@ struct FP : public ISubgameSolver {
         if (params.optimistic) {
           // Use safe normalization to prevent assertion failures when strategies become all zeros
           std::vector<double> combined(sum_strategies[node][i].size());
-          double combined_sum = 0.0;
           for (size_t j = 0; j < combined.size(); ++j) {
             combined[j] = sum_strategies[node][i][j] + last_strategies[node][i][j];
-            combined_sum += combined[j];
-          }
-          if (combined_sum < kRegretSmoothingEps) {
-            std::cerr << "[DEBUG] subgame_solving.cc:480 optimistic: combined_sum=" << combined_sum 
-                      << " node=" << node << " hand=" << i << " size=" << combined.size() << std::endl;
           }
           normalize_probabilities_safe(combined, kRegretSmoothingEps,
                                        &average_strategies[node][i]);
         } else {
-          double sum_sum = 0.0;
-          for (size_t j = 0; j < sum_strategies[node][i].size(); ++j) {
-            sum_sum += sum_strategies[node][i][j];
-          }
-          if (sum_sum < kRegretSmoothingEps) {
-            std::cerr << "[DEBUG] subgame_solving.cc:489 non-optimistic: sum_sum=" << sum_sum 
-                      << " node=" << node << " hand=" << i << " size=" << sum_strategies[node][i].size() << std::endl;
-          }
           normalize_probabilities_safe(sum_strategies[node][i], kRegretSmoothingEps,
                                       &average_strategies[node][i]);
         }
@@ -676,14 +662,6 @@ struct CFR : public ISubgameSolver, private PartialTreeTraverser {
               std::max<double>(regrets[node][i][action], kRegretSmoothingEps);
         }
         // Use safe normalization to prevent assertion failures
-        double last_sum = 0.0;
-        for (size_t j = 0; j < last_strategies[node][i].size(); ++j) {
-          last_sum += last_strategies[node][i][j];
-        }
-        if (last_sum < kRegretSmoothingEps) {
-          std::cerr << "[DEBUG] subgame_solving.cc:679 last_strategies: sum=" << last_sum 
-                    << " node=" << node << " hand=" << i << " size=" << last_strategies[node][i].size() << std::endl;
-        }
         normalize_probabilities_safe(last_strategies[node][i], kRegretSmoothingEps,
                                      &last_strategies[node][i]);
       }
@@ -712,14 +690,6 @@ struct CFR : public ISubgameSolver, private PartialTreeTraverser {
               reach_probabilities_buffer[node][i] * last_strategies[node][i][a];
         }
         // Use safe normalization to prevent assertion failures
-        double final_sum = 0.0;
-        for (size_t j = 0; j < sum_strategies[node][i].size(); ++j) {
-          final_sum += sum_strategies[node][i][j];
-        }
-        if (final_sum < kRegretSmoothingEps) {
-          std::cerr << "[DEBUG] subgame_solving.cc:692 final sum_strategies: sum=" << final_sum 
-                    << " node=" << node << " hand=" << i << " size=" << sum_strategies[node][i].size() << std::endl;
-        }
         normalize_probabilities_safe(sum_strategies[node][i], kRegretSmoothingEps,
                                      &average_strategies[node][i]);
       }
