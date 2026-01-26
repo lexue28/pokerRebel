@@ -22,10 +22,11 @@ env:
 
   subgame_params:
     # CFR iterations per subgame
-    # ULTRA-SAFE defaults for CPU (prevents OOM during warmup)
-    # Scale up after first successful checkpoint: 16→32→64 for num_iters, 2→3→4 for max_depth
-    num_iters: 16         # Ultra-safe for first run (was 256 - causes OOM)
-    max_depth: 2          # Ultra-safe for first run (was 4 - causes OOM)
+    # STRONG config matching run_cpu_batch_strong.sh for better gameplay
+    # These values are explicitly set in the batch script, but having them here ensures
+    # they're used even if someone runs without the batch script
+    num_iters: 64         # Strong config for gameplay (matches .sh script)
+    max_depth: 3          # Strong config for gameplay (matches .sh script)
     linear_update: true
 
 # NOTE: exploitability evaluation uses the C++ solver + TorchScript net and may
@@ -41,7 +42,7 @@ selfplay:
   models_per_gpu: 1
 
   # CPU-only data generation
-  cpu_gen_threads: 1      # Ultra-safe for first run (was 8 - reduces parallel memory blowup)
+  cpu_gen_threads: 4      # Strong config (matches .sh script) - was 1 for ultra-safe
 
 train_gen_ratio: 4
 task: selfplay
@@ -49,7 +50,9 @@ task: selfplay
 loss: huber
 
 min_buffer_to_send: 2500
-max_epochs: 3000          # Smaller than LD
+max_epochs: 1500          # Reduced from 3000 - loss typically plateaus around 1000-1500 epochs
+                          # With stronger config (64 iters, 3 depth), 1500 should be sufficient
+                          # Can always stop early if loss plateaus (checkpoints every 10 epochs)
 
 model:
   name: Net2
@@ -61,11 +64,11 @@ model:
 create_validation_set_every: 100
 
 data:
-  train_epoch_size: 200   # Ultra-safe for first run (was 12800)
-  train_batch_size: 16    # Ultra-safe for first run (was 512)
+  train_epoch_size: 3200  # Strong config (matches .sh script) - was 200 for ultra-safe
+  train_batch_size: 128   # Strong config (matches .sh script) - was 16 for ultra-safe
 
 replay:
-  capacity: 1000          # Ultra-safe for first run (was 500000 - prevents OOM)
+  capacity: 50000         # Strong config (matches .sh script) - was 1000 for ultra-safe
   alpha: 1.0
   beta: 1.0
   prefetch: 8
