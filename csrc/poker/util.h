@@ -14,8 +14,10 @@
 
 #pragma once
 
+#include <iostream>
 #include <numeric>
 #include <vector>
+#include <algorithm>
 
 namespace poker {
 
@@ -26,6 +28,16 @@ inline double normalize_probabilities(const std::vector<double>& unnormed_probs,
                                       T* probs) {
   const double sum =
       std::accumulate(unnormed_probs.begin(), unnormed_probs.end(), double{0});
+  if (sum < kAlmostZero) {
+    std::cerr << "[ERROR] normalize_probabilities: sum=" << sum << " < kAlmostZero=" << kAlmostZero << std::endl;
+    std::cerr << "[ERROR] Vector size: " << unnormed_probs.size() << std::endl;
+    std::cerr << "[ERROR] First 5 values: ";
+    for (size_t i = 0; i < std::min(size_t(5), unnormed_probs.size()); ++i) {
+      std::cerr << unnormed_probs[i] << " ";
+    }
+    std::cerr << std::endl;
+    std::cerr << "[ERROR] This should use normalize_probabilities_safe instead!" << std::endl;
+  }
   assert(sum >= kAlmostZero);
   for (size_t i = 0; i < unnormed_probs.size(); ++i) {
     probs[i] = unnormed_probs[i] / sum;
@@ -52,6 +64,11 @@ inline double normalize_probabilities(const std::vector<double>& unnormed_probs,
   const double sum =
       std::accumulate(unnormed_probs.begin(), unnormed_probs.end(), double{0}) +
       std::accumulate(last_probs.begin(), last_probs.end(), double{0});
+  if (sum < kAlmostZero) {
+    std::cerr << "[ERROR] normalize_probabilities (2-arg): sum=" << sum << " < kAlmostZero=" << kAlmostZero << std::endl;
+    std::cerr << "[ERROR] Vector sizes: " << unnormed_probs.size() << ", " << last_probs.size() << std::endl;
+    std::cerr << "[ERROR] This should use normalize_probabilities_safe instead!" << std::endl;
+  }
   assert(sum >= kAlmostZero);
   for (size_t i = 0; i < unnormed_probs.size(); ++i) {
     probs[i] = (unnormed_probs[i] + last_probs[i]) / sum;

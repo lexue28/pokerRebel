@@ -14,6 +14,7 @@
 
 #include "stats.h"
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -109,11 +110,21 @@ float eval_net(const Game& game, const TreeStrategy& net_strategy,
   std::vector<float> mses;
 
   for (auto node_id : top_node_ids) {
+    // Use safe normalization to prevent assertion failures
+    double reach0_sum = 0.0, reach1_sum = 0.0;
+    for (size_t j = 0; j < traversing_stats.reach_probabilities[0][node_id].size(); ++j) {
+      reach0_sum += traversing_stats.reach_probabilities[0][node_id][j];
+      reach1_sum += traversing_stats.reach_probabilities[1][node_id][j];
+    }
+    if (reach0_sum < kReachSmoothingEps || reach1_sum < kReachSmoothingEps) {
+      std::cerr << "[DEBUG] stats.cc:113 reach_probabilities: node=" << node_id 
+                << " reach0_sum=" << reach0_sum << " reach1_sum=" << reach1_sum << std::endl;
+    }
     Pair<std::vector<double>> beliefs = {
-        normalize_probabilities(
-            traversing_stats.reach_probabilities[0][node_id]),
-        normalize_probabilities(
-            traversing_stats.reach_probabilities[1][node_id])};
+        normalize_probabilities_safe(
+            traversing_stats.reach_probabilities[0][node_id], kReachSmoothingEps),
+        normalize_probabilities_safe(
+            traversing_stats.reach_probabilities[1][node_id], kReachSmoothingEps)};
     const auto& state = full_tree[node_id].state;
     SubgameSolvingParams params;
     params.num_iters = fp_iters;
