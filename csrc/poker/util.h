@@ -17,7 +17,6 @@
 #include <iostream>
 #include <numeric>
 #include <vector>
-#include <algorithm>
 
 namespace poker {
 
@@ -32,7 +31,8 @@ inline double normalize_probabilities(const std::vector<double>& unnormed_probs,
     std::cerr << "[ERROR] normalize_probabilities: sum=" << sum << " < kAlmostZero=" << kAlmostZero << std::endl;
     std::cerr << "[ERROR] Vector size: " << unnormed_probs.size() << std::endl;
     std::cerr << "[ERROR] First 5 values: ";
-    for (size_t i = 0; i < std::min(size_t(5), unnormed_probs.size()); ++i) {
+    size_t print_count = (unnormed_probs.size() < 5) ? unnormed_probs.size() : 5;
+    for (size_t i = 0; i < print_count; ++i) {
       std::cerr << unnormed_probs[i] << " ";
     }
     std::cerr << std::endl;

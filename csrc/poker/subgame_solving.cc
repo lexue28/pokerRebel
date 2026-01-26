@@ -676,6 +676,14 @@ struct CFR : public ISubgameSolver, private PartialTreeTraverser {
               std::max<double>(regrets[node][i][action], kRegretSmoothingEps);
         }
         // Use safe normalization to prevent assertion failures
+        double last_sum = 0.0;
+        for (size_t j = 0; j < last_strategies[node][i].size(); ++j) {
+          last_sum += last_strategies[node][i][j];
+        }
+        if (last_sum < kRegretSmoothingEps) {
+          std::cerr << "[DEBUG] subgame_solving.cc:679 last_strategies: sum=" << last_sum 
+                    << " node=" << node << " hand=" << i << " size=" << last_strategies[node][i].size() << std::endl;
+        }
         normalize_probabilities_safe(last_strategies[node][i], kRegretSmoothingEps,
                                      &last_strategies[node][i]);
       }
