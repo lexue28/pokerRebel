@@ -50,4 +50,4 @@ mkdir -p logs
 # - data.train_epoch_size=3200: More training per epoch (was 200)
 # - data.train_batch_size=128: Larger batches (was 16)
 # This will produce a MUCH stronger model for gameplay
-python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu exploit=false selfplay.cpu_gen_threads=2 replay.capacity=40000 data.train_epoch_size=3200 data.train_batch_size=128 env.subgame_params.num_iters=64 env.subgame_params.max_depth=3
+python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu exploit=false selfplay.cpu_gen_threads=2 replay.capacity=40000 data.train_epoch_size=1600 data.train_batch_size=128 env.subgame_params.num_iters=64 env.subgame_params.max_depth=3

@@ -32,7 +32,7 @@ python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml \
     exploit=false \
     selfplay.cpu_gen_threads=1 \
     replay.capacity=20000 \
-    data.train_epoch_size=2400 \
+    data.train_epoch_size=1200 \
     data.train_batch_size=64 \
     max_epochs=500 \
     env.subgame_params.num_iters=24 \

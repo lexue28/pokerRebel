@@ -64,7 +64,7 @@ model:
 create_validation_set_every: 100
 
 data:
-  train_epoch_size: 3200  # Strong config (matches .sh script) - was 200 for ultra-safe
+  train_epoch_size: 1600  # Reduced from 3200 - faster training start, still good quality
   train_batch_size: 128   # Strong config (matches .sh script) - was 16 for ultra-safe
 
 replay:
