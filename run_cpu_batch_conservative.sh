@@ -5,8 +5,8 @@
 #SBATCH -p mit_normal
 #SBATCH -n 1
 #SBATCH -c 10
-#SBATCH --mem=96G               # Lower memory request
-#SBATCH --time=24:00:00
+#SBATCH --mem=250G               # High memory (nodes have 385G)
+#SBATCH --time=12:00:00  # Reduced time limit to avoid partition limit
 #SBATCH --job-name=rebel_conservative
 #SBATCH --output=logs/logs_conservative_%j.out
 #SBATCH --error=logs/logs_conservative_%j.err

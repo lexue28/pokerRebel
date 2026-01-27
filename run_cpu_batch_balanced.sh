@@ -5,8 +5,8 @@
 #SBATCH -p mit_normal
 #SBATCH -n 1                    # Number of tasks
 #SBATCH -c 10                   # CPUs per task
-#SBATCH --mem=128G              # Memory (balanced - test if this works)
-#SBATCH --time=24:00:00         # Time limit
+#SBATCH --mem=300G              # High memory (nodes have 385G)
+#SBATCH --time=12:00:00         # Time limit (reduced to avoid partition limit)
 #SBATCH --job-name=rebel_balanced
 #SBATCH --output=logs/logs_balanced_%j.out
 #SBATCH --error=logs/logs_balanced_%j.err

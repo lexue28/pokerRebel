@@ -4,8 +4,8 @@
 #SBATCH -p mit_normal
 #SBATCH -n 1                    # Number of tasks
 #SBATCH -c 10                   # CPUs per task
-#SBATCH --mem=192G               # Memory (increased further for strong config)
-#SBATCH --time=24:00:00         # Time limit (24 hours for stronger training)
+#SBATCH --mem=350G               # High memory (nodes have 385G, leaving headroom)
+#SBATCH --time=12:00:00         # Time limit (reduced to avoid partition limit)
 #SBATCH --job-name=rebel_strong # Job name
 #SBATCH --output=logs/logs_strong_%j.out    # Standard output
 #SBATCH --error=logs/logs_strong_%j.err     # Standard error
