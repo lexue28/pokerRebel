@@ -244,10 +244,11 @@ void RlRunner::sample_state_to_leaf(const ISubgameSolver* solver) {
   // `get_belief_propogation_strategy` that could differ from the sampling
   // strategy.
   for (auto [node_id, action] : path) {
-    const auto action_begin = game_.get_bid_range(state_).first;
+    const auto& node_state = tree[node_id].state;
+    const auto action_begin = game_.get_bid_range(node_state).first;
     const auto& policy = solver->get_belief_propogation_strategy()[node_id];
     // POKER: Get active player from state
-    int active = Game::get_active_player(state_);
+    int active = Game::get_active_player(node_state);
     for (int hand = 0; hand < game_.num_hands(); ++hand) {
       // Assuming that the policy has zeros outside of the range.
       beliefs_[active][hand] *= policy[hand][action];
