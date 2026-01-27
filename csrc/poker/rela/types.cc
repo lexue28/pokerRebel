@@ -50,7 +50,7 @@ ValueTransition ValueTransition::fromVector(
   assert(tensors.size() == 2);
   result.query = tensors[0];
   result.values = tensors[1];
-  return std::move(result);
+  return result;
 }
 
 ValueTransition ValueTransition::index(int i) const {
