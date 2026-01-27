@@ -553,7 +553,7 @@ class CFVExp:
                 )
                 replay.pop_until(new_size)
 
-            if self.is_master and epoch % 10 == 0:
+            if self.is_master and epoch % 5 == 0:  # Save checkpoints every 5 epochs (0, 5, 10, 15, 20, ...)
                 with torch.no_grad():
                     for i, (name, val_loader) in enumerate(val_datasets):
                         self.train_timer.start("valid-acc-extra")
