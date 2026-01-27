@@ -4,7 +4,7 @@
 #SBATCH -p mit_normal
 #SBATCH -n 1                    # Number of tasks
 #SBATCH -c 10                   # CPUs per task
-#SBATCH --mem=128G               # Memory (increased for stronger config)
+#SBATCH --mem=192G               # Memory (increased further for strong config)
 #SBATCH --time=24:00:00         # Time limit (24 hours for stronger training)
 #SBATCH --job-name=rebel_strong # Job name
 #SBATCH --output=logs/logs_strong_%j.out    # Standard output
@@ -45,9 +45,9 @@ mkdir -p logs
 # STRONGER config for better gameplay:
 # - num_iters=64: More CFR iterations per subgame (was 16)
 # - max_depth=3: Deeper subgame trees (was 2)
-# - cpu_gen_threads=4: More parallel generation (was 1)
-# - replay.capacity=50000: Larger replay buffer (was 1000)
+# - cpu_gen_threads=2: Reduced from 4 to lower peak memory (4 subgames in parallel = 4x memory)
+# - replay.capacity=40000: Slightly reduced to save memory (was 50000)
 # - data.train_epoch_size=3200: More training per epoch (was 200)
 # - data.train_batch_size=128: Larger batches (was 16)
 # This will produce a MUCH stronger model for gameplay
-python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu exploit=false selfplay.cpu_gen_threads=4 replay.capacity=50000 data.train_epoch_size=3200 data.train_batch_size=128 env.subgame_params.num_iters=64 env.subgame_params.max_depth=3
+python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml device=cpu exploit=false selfplay.cpu_gen_threads=2 replay.capacity=40000 data.train_epoch_size=3200 data.train_batch_size=128 env.subgame_params.num_iters=64 env.subgame_params.max_depth=3
