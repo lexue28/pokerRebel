@@ -1,7 +1,10 @@
+# MIT Pokerbots 2026
+This repository is built upon Facebook's ReBeL (cited below) for the [MIT Pokerbots 2026 competition](https://github.com/mitpokerbots/class-resources-2026). The code was adapted from Liar's Dice to a poker variant with a three flop and trained using MIT's Engaging Cluster, then submitted to the scrimmage server.
+
+
 # ReBeL
 
-Implementation of [ReBeL](https://arxiv.org/abs/2007.13544), an algorithm that generalizes the paradigm of self-play reinforcement learning and search to imperfect-information games.
-This repository contains implementation only for [Liar's Dice](https://en.wikipedia.org/wiki/Liar%27s_dice) game.
+Implementation of [ReBeL](https://arxiv.org/abs/2007.13544) for a poker [variant](https://github.com/mitpokerbots/class-resources-2026/blob/main/variant.pdf), an algorithm that generalizes the paradigm of self-play reinforcement learning and search to imperfect-information games.
 
 ## Installation
 
@@ -10,7 +13,7 @@ The recommended way to install ReBeL is via conda env.
 First, clone and create the conda env:
 
 ```bash
-git clone --recursive https://github.com/facebookresearch/rebel.git
+git clone --recursive https://github.com/lexue28/rebel
 cd rebel
 conda create --yes -n rebel python=3.7
 source activate rebel
@@ -31,28 +34,17 @@ make
 
 ## Training a value net
 
-Use the following command to train a value net with data generation placed on CPU:
+Use the batch scripts in /batch such as [batch/run_cpu_batch_balanced.sh](batch/run_cpu_batch_balanced.sh) or the following command to train a value net with data generation placed on CPU:
 
 ```
-python run.py --adhoc --cfg conf/c02_selfplay/liars_sp.yaml \
+python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml \
     env.num_dice=1 \
     env.num_faces=4 \
     env.subgame_params.use_cfr=true \
     selfplay.cpu_gen_threads=60
 ```
 
-As CFR requires evaluation of the value function for several nodes at each iteration, the code above will be pretty slow. If you have multiple GPUs on your machine, use these flags instead. First GPU will be used for training and the others will be used for data generation with 8 CPU threads per each GPU:
-
-```
-python run.py --adhoc --cfg conf/c02_selfplay/liars_sp.yaml \
-    env.num_dice=1 \
-    env.num_faces=4 \
-    env.subgame_params.use_cfr=true \
-    selfplay.cpu_gen_threads=0  \
-    selfplay.threads_per_gpu=8
-```
-
-Check the config [conf/c02_selfplay/liars_sp.yaml](conf/c02_selfplay/liars_sp.yaml) for all possible parameters. If use use Slurm to manage the cluster, add `launcher=slurm_8gpus launcher.num_gpus=NUM_GPUS` to run the job on the cluster. If you specify `NUM_GPUS > 8`, the code will assume that you are launching on several machines with 8 GPUs each.
+Check the config [conf/c02_selfplay/poker.yaml](conf/c02_selfplay/poker.yaml) for all possible parameters. If use use Slurm to manage the cluster, add `launcher=slurm_8gpus launcher.num_gpus=NUM_GPUS` to run the job on the cluster with GPU. If you specify `NUM_GPUS > 8`, the code will assume that you are launching on several machines with 8 GPUs each.
 
 
 ## Evaluating a value net
@@ -62,9 +54,6 @@ The trainer saves checkpoints every 10 epochs as state dictionaries and as Torch
 ```
 build/recursive_eval \
     --net path/to/model.torchscript \
-    --mdp_depth 2 \
-    --num_faces 4 \
-    --num_dice 1 \
     --subgame_iters 1024 \
     --num_repeats 4097 \
     --num_threads 10 \
@@ -75,18 +64,9 @@ Setting `--num_repeats` to a positive value enables evaluation of a sampled poli
 
 The script reports exploitability for both full tree solving and recursive solving.
 
-
-## Pretrained checkpoints
-
-We release checkpoints of value function for games 1x4f, 1x5f, 1x6f, and 2x3f. We report the average exploitability of these checkpoints in the paper. Use [eval_all.py](https://github.com/facebookresearch/rebel/blob/master/scripts/eval_all.py) script to download and evaluate all the models.
-
 ## Code structure
 
-The training loop is implemented in Python and located in [cfvpy/selfplay.py](cfvpy/selfplay.py). The actual data generation part happens in C++ and could be found in [csrc/liarc_dice](csrc/liars_dice).
-
-## License
-Rebel is released under the Apache license. See [LICENSE](LICENSE) for additional details.
-
+The training loop is implemented in Python and located in [cfvpy/selfplay.py](cfvpy/selfplay.py). The actual data generation part happens in C++ and could be found in [csrc/poker](csrc/poker).
 
 ## Citation
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Job Flags - CPU-only job with BALANCED parameters
+# Job Flags - CPU-only job with balanced parameters
 # This config balances model quality with resource usage
 #SBATCH -p mit_normal
 #SBATCH -n 1                    # Number of tasks
