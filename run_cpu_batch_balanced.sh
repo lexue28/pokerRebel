@@ -28,19 +28,20 @@ echo ""
 cd ~/rebel
 mkdir -p logs
 
-# BALANCED config - good quality without excessive memory:
-# - num_iters=48: Strong but not extreme (64 was too much)
-# - max_depth=3: Keep at 3 (important for quality)
-# - cpu_gen_threads=2: Lower parallelism to reduce peak memory
-# - replay.capacity=30000: Reduced from 40000
-# - data.train_epoch_size=3200: Keep same
-# - data.train_batch_size=128: Keep same
+# BALANCED config - moderate speedup to reach epoch 10:
+# - num_iters=40: Reduced from 48 (~17% faster, minimal quality loss)
+# - max_depth=3: Keep at 3 (critical for quality)
+# - cpu_gen_threads=2: Keep same (balance between speed and memory)
+# - replay.capacity=25000: Reduced from 30000 (~17% faster buffer ops)
+# - data.train_epoch_size=1000: Reduced from 1200 (~17% faster epochs)
+# - data.train_batch_size=96: Reduced from 128 (~25% faster training)
+# Target: ~1 hour/epoch to reach epoch 10 in 12 hours
 python run.py --adhoc --cfg conf/c02_selfplay/poker.yaml \
     device=cpu \
     exploit=false \
     selfplay.cpu_gen_threads=2 \
-    replay.capacity=30000 \
-    data.train_epoch_size=1200 \
-    data.train_batch_size=128 \
-    env.subgame_params.num_iters=48 \
+    replay.capacity=25000 \
+    data.train_epoch_size=1000 \
+    data.train_batch_size=96 \
+    env.subgame_params.num_iters=40 \
     env.subgame_params.max_depth=3
